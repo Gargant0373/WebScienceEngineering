@@ -1,0 +1,23 @@
+ollama:
+  model: llama3.2:3B
+  base_url: http://localhost:11434
+
+datasets:
+  nyt:
+    base_url: "https://raw.githubusercontent.com/fhamborg/NewsMTSC/6b838e00f54423c253806327a0ae24dbffa24c9e/NewsSentiment/experiments/default/datasets/newsmtsc-rw-hf/"
+    splits:
+      - train.jsonl
+      - dev.jsonl
+      - test.jsonl
+    sample_size: 500
+  amazon:
+    hf_name: fancyzhx/amazon_polarity
+    split: test
+    sample_size: 500
+
+output:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  results_dir: results
+
+seed: 42
