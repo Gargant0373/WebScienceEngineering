@@ -1,12 +1,12 @@
 """
-Clean amazon_polarity raw records into a balanced labeled CSV.
+Clean SetFit/amazon_reviews_multi_en raw records into a balanced labeled CSV.
 
 Input columns:
-  content   - review text
-  label     - 0=negative, 1=positive
+  text    - review text
+  label   - 0=1-star … 4=5-star
 
 Output CSV columns:
-  text, human_label   (values: positive / negative)
+  text, human_label   (values: negative / neutral / positive)
 """
 import json
 import pathlib
@@ -15,7 +15,7 @@ import re
 import pandas as pd
 
 
-_LABEL_MAP = {0: "negative", 1: "positive"}
+_LABEL_MAP = {0: "negative", 1: "negative", 2: "neutral", 3: "positive", 4: "positive"}
 
 
 def _clean_text(text: str) -> str:
@@ -37,7 +37,7 @@ def clean_amazon(cfg: dict) -> pathlib.Path:
             label = _LABEL_MAP.get(record.get("label"))
             if label is None:
                 continue
-            text = _clean_text(record.get("content", ""))
+            text = _clean_text(record.get("text", ""))
             if len(text) < 10:
                 continue
             rows.append({"text": text, "human_label": label})

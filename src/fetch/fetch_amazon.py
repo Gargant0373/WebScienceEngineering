@@ -1,8 +1,9 @@
 """
-Fetch amazon_polarity dataset (product reviews with binary sentiment labels)
+Fetch SetFit/amazon_reviews_multi_en dataset (English product reviews with 0-4 star labels)
 and save raw records to data/raw/amazon/raw.jsonl.
 
-amazon_polarity labels: 0=negative (1-2 stars), 1=positive (4-5 stars)
+Labels: 0=1-star, 1=2-star, 2=3-star, 3=4-star, 4=5-star
+Mapped in clean step: 0,1→negative  2→neutral  3,4→positive
 """
 import json
 import pathlib

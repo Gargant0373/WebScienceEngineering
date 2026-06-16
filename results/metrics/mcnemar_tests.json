@@ -1,18 +1,18 @@
 {
   "prompt_effect_nyt": {
-    "statistic": 18.7933,
+    "statistic": 28.6807,
     "p_value": 0.0,
     "n_pairs": 498,
-    "n_a_correct_b_wrong": 119,
-    "n_a_wrong_b_correct": 60,
+    "n_a_correct_b_wrong": 118,
+    "n_a_wrong_b_correct": 48,
     "significant_at_0.05": true
   },
   "prompt_effect_amazon": {
-    "statistic": 194.7682,
+    "statistic": 43.5956,
     "p_value": 0.0,
-    "n_pairs": 500,
-    "n_a_correct_b_wrong": 214,
-    "n_a_wrong_b_correct": 6,
+    "n_pairs": 498,
+    "n_a_correct_b_wrong": 107,
+    "n_a_wrong_b_correct": 29,
     "significant_at_0.05": true
   }
 }

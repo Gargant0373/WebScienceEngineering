@@ -23,6 +23,14 @@ def _load_metrics(results_dir: pathlib.Path, mode: str, domain: str) -> dict:
         return json.load(f)
 
 
+def _load_model_agreement(results_dir: pathlib.Path, mode: str, domain: str) -> dict:
+    p = results_dir / "error_analysis" / mode / f"{domain}_model_agreement.json"
+    if not p.exists():
+        return {}
+    with p.open() as f:
+        return json.load(f)
+
+
 def _load_feature_summary(results_dir: pathlib.Path, mode: str, domain: str) -> dict:
     p = results_dir / "error_analysis" / mode / f"{domain}_feature_summary.json"
     if not p.exists():
@@ -187,3 +195,26 @@ def compare(results_dir: pathlib.Path) -> None:
         )
         print("\n[compare] feature uplift (mean across all runs):")
         print(agg.to_string())
+
+    # --- Inter-model feature agreement (Llama vs Qwen) ---
+    agreement_rows = []
+    for mode in modes:
+        for domain in domains:
+            agreement = _load_model_agreement(results_dir, mode, domain)
+            for feat, stats in agreement.items():
+                agreement_rows.append({"mode": mode, "domain": domain, "feature": feat, **stats})
+
+    if agreement_rows:
+        agreement_df = pd.DataFrame(agreement_rows)
+        agreement_path = results_dir / "error_analysis" / "model_agreement_combined.csv"
+        agreement_df.to_csv(agreement_path, index=False)
+        print(f"\n[compare] inter-model agreement → {agreement_path}")
+
+        agg_agreement = (
+            agreement_df.groupby("feature")[["agreement", "cohen_kappa"]]
+            .mean()
+            .sort_values("cohen_kappa", ascending=False)
+            .round(4)
+        )
+        print("\n[compare] Llama vs Qwen feature agreement (mean across all runs):")
+        print(agg_agreement.to_string())

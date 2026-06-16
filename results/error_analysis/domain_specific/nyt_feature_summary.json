@@ -1,52 +1,52 @@
 {
   "total_samples": 498,
-  "total_disagreements": 255,
-  "overall_disagree_rate": 0.512,
+  "total_disagreements": 262,
+  "overall_disagree_rate": 0.5261,
   "feature_ranking": [
     {
-      "feature": "slang",
-      "n_present": 3,
-      "n_disagree_with_feature": 2,
-      "disagree_rate": 0.6667,
-      "baseline_disagree_rate": 0.5111,
-      "uplift": 0.1556,
-      "coverage_of_disagreements": 0.0078
+      "feature": "mixed_sentiment",
+      "n_present": 155,
+      "n_disagree_with_feature": 92,
+      "disagree_rate": 0.5935,
+      "baseline_disagree_rate": 0.4956,
+      "uplift": 0.0979,
+      "coverage_of_disagreements": 0.3511
     },
     {
-      "feature": "mixed_sentiment",
-      "n_present": 67,
-      "n_disagree_with_feature": 33,
-      "disagree_rate": 0.4925,
-      "baseline_disagree_rate": 0.5151,
-      "uplift": -0.0225,
-      "coverage_of_disagreements": 0.1294
+      "feature": "slang",
+      "n_present": 10,
+      "n_disagree_with_feature": 5,
+      "disagree_rate": 0.5,
+      "baseline_disagree_rate": 0.5266,
+      "uplift": -0.0266,
+      "coverage_of_disagreements": 0.0191
     },
     {
       "feature": "hedging",
-      "n_present": 70,
-      "n_disagree_with_feature": 32,
-      "disagree_rate": 0.4571,
-      "baseline_disagree_rate": 0.521,
-      "uplift": -0.0639,
-      "coverage_of_disagreements": 0.1255
-    },
-    {
-      "feature": "implicit_meaning",
-      "n_present": 290,
-      "n_disagree_with_feature": 140,
-      "disagree_rate": 0.4828,
-      "baseline_disagree_rate": 0.5529,
-      "uplift": -0.0701,
-      "coverage_of_disagreements": 0.549
+      "n_present": 299,
+      "n_disagree_with_feature": 153,
+      "disagree_rate": 0.5117,
+      "baseline_disagree_rate": 0.5477,
+      "uplift": -0.036,
+      "coverage_of_disagreements": 0.584
     },
     {
       "feature": "sarcasm",
-      "n_present": 23,
-      "n_disagree_with_feature": 9,
-      "disagree_rate": 0.3913,
-      "baseline_disagree_rate": 0.5179,
-      "uplift": -0.1266,
-      "coverage_of_disagreements": 0.0353
+      "n_present": 44,
+      "n_disagree_with_feature": 19,
+      "disagree_rate": 0.4318,
+      "baseline_disagree_rate": 0.5352,
+      "uplift": -0.1034,
+      "coverage_of_disagreements": 0.0725
+    },
+    {
+      "feature": "implicit_meaning",
+      "n_present": 17,
+      "n_disagree_with_feature": 7,
+      "disagree_rate": 0.4118,
+      "baseline_disagree_rate": 0.5301,
+      "uplift": -0.1184,
+      "coverage_of_disagreements": 0.0267
     }
   ]
 }

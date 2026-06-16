@@ -1,6 +1,9 @@
 ollama:
-  model: llama3.2:3B
+  model: llama3.2:3b
   base_url: http://localhost:11434
+  models:
+    - "llama3.2:3b"
+    - "qwen2.5:3b"
 
 datasets:
   nyt:
@@ -11,9 +14,9 @@ datasets:
       - test.jsonl
     sample_size: 500
   amazon:
-    hf_name: fancyzhx/amazon_polarity
+    hf_name: SetFit/amazon_reviews_multi_en
     split: test
-    sample_size: 500
+    sample_size: 498
 
 output:
   raw_dir: data/raw

@@ -1,12 +1,21 @@
 """
-LLM-based linguistic feature detection using the same Ollama model as classification.
+LLM-based linguistic feature detection using multiple Ollama models.
 
-For each text, asks Llama to return a JSON object with five boolean features:
+Models:
+- llama3.2:3b
+- qwen2.5:3b
+
+Each text is annotated independently by both models for:
   sarcasm, slang, hedging, mixed_sentiment, implicit_meaning
 
-Results are cached to data/processed/llm_features_cache.jsonl (keyed by MD5 hash
-of the text) so the Ollama calls only happen once across all evaluate runs.
+Cache format (JSONL):
+{
+  "hash": "...",
+  "llama3.2:3b": {...features...},
+  "qwen2.5:3b": {...features...}
+}
 """
+
 import hashlib
 import json
 import pathlib
@@ -28,13 +37,21 @@ _USER_TEMPLATE = """\
 Classify the following text for five linguistic features.
 Return a JSON object with exactly these boolean keys:
 
-"sarcasm"          — true if the text uses irony or means the opposite of what is said
-"slang"            — true if the text contains internet slang, abbreviations, or very informal expressions
-"hedging"          — true if the text uses epistemic hedges (might, perhaps, allegedly, reportedly, appears to, seems)
-"mixed_sentiment"  — true if the text contains both positive and negative sentiment
-"implicit_meaning" — true if the sentiment is implied by events or facts rather than stated with explicit sentiment words
+"sarcasm"
+"slang"
+"hedging"
+"mixed_sentiment"
+"implicit_meaning"
 
-Text: {text}"""
+Definitions:
+- sarcasm: irony or opposite meaning
+- slang: informal expressions, abbreviations, internet slang
+- hedging: uncertainty (might, seems, appears, reportedly)
+- mixed_sentiment: both positive and negative sentiment
+- implicit_meaning: sentiment implied rather than explicit
+
+Text: {text}
+"""
 
 
 def _md5(text: str) -> str:
@@ -45,42 +62,56 @@ def _parse_response(raw: str) -> dict:
     start = raw.find("{")
     end = raw.rfind("}") + 1
     if start == -1 or end == 0:
-        raise ValueError("no JSON object found")
+        raise ValueError("no JSON found")
+
     parsed = json.loads(raw[start:end])
     return {k: bool(parsed.get(k, False)) for k in FEATURES}
 
 
-def detect_features(
-    texts: list[str],
-    cfg: dict,
-    cache_path: pathlib.Path = _CACHE_PATH,
-) -> pd.DataFrame:
-    cache_path = pathlib.Path(cache_path)
+def detect_features(texts: list[str], cfg: dict) -> pd.DataFrame:
+    cache_path = pathlib.Path(_CACHE_PATH)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Load existing cache
-    cache: dict[str, dict] = {}
+    models = cfg["ollama"].get(
+        "models",
+        [cfg["ollama"]["model"]]
+    )
+
+    # -----------------------
+    # Load cache
+    # -----------------------
+    cache = {}
     if cache_path.exists():
         with cache_path.open() as f:
             for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                entry = json.loads(line)
-                cache[entry["hash"]] = {k: entry[k] for k in FEATURES}
+                if line.strip():
+                    entry = json.loads(line)
+                    cache[entry["hash"]] = entry
 
     client = ollama.Client(host=cfg["ollama"]["base_url"])
-    model = cfg["ollama"]["model"]
 
-    to_classify = [(t, _md5(t)) for t in texts if _md5(t) not in cache]
-    n_cached = len(texts) - len(to_classify)
-    if n_cached:
-        print(f"[llm_features] {n_cached} texts loaded from cache, {len(to_classify)} new")
+    to_process = []
+    for t in texts:
+        h = _md5(t)
+        if h not in cache:
+            cache[h] = {"hash": h}
+        to_process.append((t, h))
 
-    if to_classify:
-        with cache_path.open("a") as cache_f:
-            for text, h in tqdm(to_classify, desc="LLM feature detection"):
+    # -----------------------
+    # Run missing annotations
+    # -----------------------
+    with cache_path.open("a") as cache_f:
+        for text, h in tqdm(to_process, desc="LLM feature detection (multi-model)"):
+
+            changed = False
+            for model in models:
+
+                # skip if already computed
+                if model in cache[h]:
+                    continue
+
                 prompt = _USER_TEMPLATE.format(text=text[:600])
+
                 try:
                     response = client.chat(
                         model=model,
@@ -90,19 +121,37 @@ def detect_features(
                         ],
                         options={"temperature": 0},
                     )
+
                     feats = _parse_response(response.message.content.strip())
+
                 except Exception:
                     feats = {k: False for k in FEATURES}
 
-                cache[h] = feats
-                cache_f.write(
-                    json.dumps({"hash": h, **feats}) + "\n"
-                )
+                cache[h][model] = feats
+                changed = True
 
+            if changed:
+                cache_f.write(json.dumps(cache[h]) + "\n")
+
+    # -----------------------
+    # Build dataframe (default = llama)
+    # -----------------------
     rows = []
     for text in texts:
+        h = _md5(text)
+        entry = cache.get(h, {})
+
         row = {"text": text}
-        row.update(cache.get(_md5(text), {k: False for k in FEATURES}))
+
+        # keep llama as default features for existing pipeline
+        llama_feats = entry.get("llama3.2:3b", {k: False for k in FEATURES})
+        row.update(llama_feats)
+
+        # ALSO store qwen (for RQ2 upgrade later)
+        qwen_feats = entry.get("qwen2.5:3b", {k: False for k in FEATURES})
+        for k in FEATURES:
+            row[f"qwen_{k}"] = qwen_feats.get(k, False)
+
         rows.append(row)
 
     return pd.DataFrame(rows)

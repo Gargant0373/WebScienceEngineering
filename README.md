@@ -8,7 +8,7 @@ Vlad-Tudor Parau, Berat Aras, and Alex Despan — Delft University of Technology
 
 ## Overview
 
-This repository contains the full data pipeline for a research paper investigating whether a large language model (Llama 3.2:3B) maintains consistent alignment with human sentiment judgments across two contrasting web domains: formal editorial news (NewsMTSC) and informal e-commerce reviews (Amazon Polarity).
+This repository contains the full data pipeline for a research paper investigating whether a large language model (Llama 3.2:3B) maintains consistent alignment with human sentiment judgments across two contrasting web domains: formal editorial news (NewsMTSC) and informal e-commerce reviews (Amazon Reviews Multi EN).
 
 The pipeline fetches human-annotated data, balances it, runs the LLM in two prompting modes (zero-shot and domain-specific), then computes alignment metrics and performs linguistic error analysis — all reproducibly from a single command.
 
@@ -67,7 +67,7 @@ Hedging is the strongest positive predictor of disagreement. Sarcasm shows a str
 | Dataset | Domain | Source | Labels | Samples used |
 |---|---|---|---|---|
 | [NewsMTSC](https://github.com/fhamborg/NewsMTSC) | Formal — news sentences | fhamborg/NewsMTSC (GitHub) | negative / neutral / positive (expert-annotated) | 498 (balanced, 166/class) |
-| [Amazon Polarity](https://huggingface.co/datasets/fancyzhx/amazon_polarity) | Informal — product reviews | fancyzhx/amazon_polarity (HuggingFace) | negative / positive (star ratings) | 500 (balanced, 250/class) |
+| [Amazon Reviews Multi EN](https://huggingface.co/datasets/SetFit/amazon_reviews_multi_en) | Informal — product reviews | SetFit/amazon_reviews_multi_en (HuggingFace) | negative / neutral / positive (star ratings: 1-2 / 3 / 4-5) | 498 (balanced, 166/class) |
 
 ---
 
@@ -81,7 +81,7 @@ fetch  →  clean  →  classify  →  evaluate  →  compare
 
 | Stage | Command | What it does |
 |---|---|---|
-| `fetch` | `--stage fetch` | Downloads NewsMTSC JSONL splits from GitHub; loads Amazon Polarity from HuggingFace |
+| `fetch` | `--stage fetch` | Downloads NewsMTSC JSONL splits from GitHub; loads Amazon Reviews Multi EN from HuggingFace |
 | `clean` | `--stage clean` | Deduplicates, normalises labels, downsamples to balanced class distribution |
 | `classify` | `--stage classify` | Calls Ollama (Docker) with zero-shot and domain-specific prompts; writes prediction CSVs |
 | `evaluate` | `--stage evaluate` | Computes accuracy/F1/κ per run; runs LLM-based linguistic feature detection; produces error CSVs and feature summaries |
