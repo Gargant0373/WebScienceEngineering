@@ -1,0 +1,4 @@
+model,accuracy_amazon,accuracy_nyt,f1_weighted_amazon,f1_weighted_nyt,cohen_kappa_amazon,cohen_kappa_nyt
+gemma3:4b,0.6191,0.6479,0.5776,0.6411,0.4295,0.4718
+llama3.2:3b,0.5322,0.496,0.5208,0.4725,0.2971,0.2451
+phi3:mini,0.6378,0.6414,0.6047,0.6417,0.4571,0.4628

@@ -1,0 +1,37 @@
+{
+  "sarcasm": {
+    "agreement": 0.8414,
+    "cohen_kappa": 0.4869,
+    "llama_positive_rate": 0.21887550200803213,
+    "qwen_positive_rate": 0.1606425702811245,
+    "n": 498
+  },
+  "slang": {
+    "agreement": 0.9056,
+    "cohen_kappa": 0.2257,
+    "llama_positive_rate": 0.10441767068273092,
+    "qwen_positive_rate": 0.02208835341365462,
+    "n": 498
+  },
+  "hedging": {
+    "agreement": 0.6345,
+    "cohen_kappa": 0.2783,
+    "llama_positive_rate": 0.6224899598393574,
+    "qwen_positive_rate": 0.4738955823293173,
+    "n": 498
+  },
+  "mixed_sentiment": {
+    "agreement": 0.6466,
+    "cohen_kappa": 0.1306,
+    "llama_positive_rate": 0.22289156626506024,
+    "qwen_positive_rate": 0.3313253012048193,
+    "n": 498
+  },
+  "implicit_meaning": {
+    "agreement": 0.5281,
+    "cohen_kappa": 0.0562,
+    "llama_positive_rate": 0.07228915662650602,
+    "qwen_positive_rate": 0.5,
+    "n": 498
+  }
+}

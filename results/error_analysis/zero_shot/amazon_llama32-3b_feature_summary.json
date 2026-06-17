@@ -1,0 +1,52 @@
+{
+  "total_samples": 498,
+  "total_disagreements": 172,
+  "overall_disagree_rate": 0.3454,
+  "feature_ranking": [
+    {
+      "feature": "hedging",
+      "n_present": 310,
+      "n_disagree_with_feature": 117,
+      "disagree_rate": 0.3774,
+      "baseline_disagree_rate": 0.2926,
+      "uplift": 0.0849,
+      "coverage_of_disagreements": 0.6802
+    },
+    {
+      "feature": "slang",
+      "n_present": 52,
+      "n_disagree_with_feature": 18,
+      "disagree_rate": 0.3462,
+      "baseline_disagree_rate": 0.3453,
+      "uplift": 0.0009,
+      "coverage_of_disagreements": 0.1047
+    },
+    {
+      "feature": "sarcasm",
+      "n_present": 109,
+      "n_disagree_with_feature": 36,
+      "disagree_rate": 0.3303,
+      "baseline_disagree_rate": 0.3496,
+      "uplift": -0.0193,
+      "coverage_of_disagreements": 0.2093
+    },
+    {
+      "feature": "implicit_meaning",
+      "n_present": 36,
+      "n_disagree_with_feature": 11,
+      "disagree_rate": 0.3056,
+      "baseline_disagree_rate": 0.3485,
+      "uplift": -0.0429,
+      "coverage_of_disagreements": 0.064
+    },
+    {
+      "feature": "mixed_sentiment",
+      "n_present": 111,
+      "n_disagree_with_feature": 23,
+      "disagree_rate": 0.2072,
+      "baseline_disagree_rate": 0.385,
+      "uplift": -0.1778,
+      "coverage_of_disagreements": 0.1337
+    }
+  ]
+}

@@ -1,3 +1,7 @@
-domain,accuracy_zero_shot,accuracy_domain_specific,accuracy_delta,kappa_zero_shot,kappa_domain_specific,kappa_delta,f1_zero_shot,f1_domain_specific,f1_delta
-nyt,0.6157,0.4777,-0.138,0.4234,0.2179,-0.2055,0.5958,0.4424,-0.1534
-amazon,0.6526,0.5393,-0.1133,0.4789,0.3072,-0.1717,0.6425,0.527,-0.1155
+model,domain,accuracy_zero_shot,accuracy_domain_specific,accuracy_delta,kappa_zero_shot,kappa_domain_specific,kappa_delta,f1_zero_shot,f1_domain_specific,f1_delta
+llama3.2:3b,nyt,0.6217,0.496,-0.1257,0.4325,0.2451,-0.1874,0.5981,0.4725,-0.1256
+llama3.2:3b,amazon,0.6546,0.5322,-0.1224,0.4819,0.2971,-0.1848,0.6427,0.5208,-0.1219
+gemma3:4b,nyt,0.6506,0.6479,-0.0027,0.4759,0.4718,-0.0041,0.6373,0.6411,0.0038
+gemma3:4b,amazon,0.6104,0.6191,0.0087,0.4157,0.4295,0.0138,0.5479,0.5776,0.0297
+phi3:mini,nyt,0.6951,0.6414,-0.0537,0.5424,0.4628,-0.0796,0.6894,0.6417,-0.0477
+phi3:mini,amazon,0.6559,0.6378,-0.0181,0.4837,0.4571,-0.0266,0.6317,0.6047,-0.027
