@@ -8,15 +8,17 @@ Vlad-Tudor Parau, Berat Aras, and Alex Despan — Delft University of Technology
 
 ## Overview
 
-This repository contains the full data pipeline for a research paper investigating whether a large language model (Llama 3.2:3B) maintains consistent alignment with human sentiment judgments across two contrasting web domains: formal editorial news (NewsMTSC) and informal e-commerce reviews (Amazon Reviews Multi EN).
+This repository contains the full data pipeline for a research paper investigating whether large language models maintain consistent alignment with human sentiment judgments across two contrasting web domains: formal editorial news (NewsMTSC) and informal e-commerce reviews (Amazon Reviews Multi EN).
 
-The pipeline fetches human-annotated data, balances it, runs the LLM in two prompting modes (zero-shot and domain-specific), then computes alignment metrics and performs linguistic error analysis — all reproducibly from a single command.
+Three models are evaluated as classifiers — Llama 3.2:3B, Gemma3:4B, and Phi3:mini — each run in both zero-shot and domain-specific prompting modes. Feature detection for RQ2 is performed independently by Llama 3.2:3B and Qwen2.5:3B, enabling inter-model agreement measurement as a robustness check.
+
+The pipeline fetches human-annotated data, balances it, runs all classifiers, then computes alignment metrics and performs linguistic error analysis — all reproducibly from a single command.
 
 ---
 
 ## Research Questions
 
-**RQ1** — How consistently does the LLM reproduce human-annotated sentiment across formal vs. informal web domains?
+**RQ1** — How consistently do LLMs reproduce human-annotated sentiment across formal vs. informal web domains?
 
 **RQ2** — Which linguistic features contribute most to disagreement between human and LLM judgments?
 
@@ -28,37 +30,63 @@ The pipeline fetches human-annotated data, balances it, runs the LLM in two prom
 
 ### RQ1 — Cross-domain alignment gap
 
-| Mode | Domain | Accuracy | F1 (weighted) | Cohen's κ |
+| Model | Mode | Domain | Accuracy | F1 (weighted) | Cohen's κ |
+|---|---|---|---|---|---|
+| Llama 3.2:3B | Zero-shot | NYT (formal) | — | — | — |
+| Llama 3.2:3B | Zero-shot | Amazon (informal) | — | — | — |
+| Llama 3.2:3B | Domain-specific | NYT (formal) | — | — | — |
+| Llama 3.2:3B | Domain-specific | Amazon (informal) | — | — | — |
+| Gemma3:4B | Zero-shot | NYT (formal) | — | — | — |
+| Gemma3:4B | Zero-shot | Amazon (informal) | — | — | — |
+| Gemma3:4B | Domain-specific | NYT (formal) | — | — | — |
+| Gemma3:4B | Domain-specific | Amazon (informal) | — | — | — |
+| Phi3:mini | Zero-shot | NYT (formal) | — | — | — |
+| Phi3:mini | Zero-shot | Amazon (informal) | — | — | — |
+| Phi3:mini | Domain-specific | NYT (formal) | — | — | — |
+| Phi3:mini | Domain-specific | Amazon (informal) | — | — | — |
+
+*Results pending.*
+
+### RQ3 — Effect of domain-specific prompting
+
+| Model | Domain | Accuracy Δ | Kappa Δ | F1 Δ |
 |---|---|---|---|---|
-| Zero-shot | NYT (formal) | 0.608 | 0.586 | 0.411 |
-| Zero-shot | Amazon (informal) | **0.874** | **0.907** | **0.765** |
-| Domain-specific | NYT (formal) | 0.492 | 0.472 | 0.239 |
-| Domain-specific | Amazon (informal) | 0.620 | 0.722 | 0.422 |
+| Llama 3.2:3B | NYT | — | — | — |
+| Llama 3.2:3B | Amazon | — | — | — |
+| Gemma3:4B | NYT | — | — | — |
+| Gemma3:4B | Amazon | — | — | — |
+| Phi3:mini | NYT | — | — | — |
+| Phi3:mini | Amazon | — | — | — |
 
-The LLM aligns substantially better with informal review sentiment than formal editorial language in zero-shot mode (87.4% vs 60.8% accuracy; κ=0.765 vs κ=0.411).
-
-### RQ3 — Domain-specific prompting degraded performance
-
-| Domain | Accuracy Δ | Kappa Δ | F1 Δ |
-|---|---|---|---|
-| NYT | −11.6pp | −0.172 | −0.114 |
-| Amazon | −25.4pp | −0.342 | −0.185 |
-
-Domain-specific prompting *hurt* both domains significantly (McNemar's test, p≈0 for both). This suggests that explicit domain priming causes the model to over-interpret neutral or hedged text as sentiment-bearing.
+*Results pending. McNemar significance tests are computed per model × domain.*
 
 ### RQ2 — Linguistic feature ranking (LLM-detected)
 
-Features were detected by querying the same Llama model for each text, ranked by disagreement uplift (P(disagree | feature present) − P(disagree | feature absent)):
+Features are detected independently by Llama 3.2:3B and Qwen2.5:3B, then ranked by disagreement uplift (P(disagree | feature present) − P(disagree | feature absent)) averaged across all runs and models:
 
 | Feature | Mean uplift |
 |---|---|
-| Hedging | +0.023 |
-| Slang | +0.010 |
-| Implicit meaning | −0.008 |
-| Mixed sentiment | −0.043 |
-| Sarcasm | **−0.183** |
+| Slang | — |
+| Hedging | — |
+| Sarcasm | — |
+| Implicit meaning | — |
+| Mixed sentiment | — |
 
-Hedging is the strongest positive predictor of disagreement. Sarcasm shows a strongly negative uplift — texts the LLM identifies as sarcastic are ones it tends to classify *in agreement* with humans, suggesting the model is internally consistent when it consciously detects irony.
+*Results pending.*
+
+### RQ2 — Inter-model feature agreement (Llama 3.2:3B vs Qwen2.5:3B)
+
+To assess robustness of the feature labels used in RQ2, the same five features were detected independently by both models. Agreement is reported as raw rate and Cohen's κ, averaged across domains:
+
+| Feature | Agreement | Cohen's κ |
+|---|---|---|
+| Sarcasm | — | — |
+| Hedging | — | — |
+| Slang | — | — |
+| Mixed sentiment | — | — |
+| Implicit meaning | — | — |
+
+*Results pending.*
 
 ---
 
@@ -83,9 +111,16 @@ fetch  →  clean  →  classify  →  evaluate  →  compare
 |---|---|---|
 | `fetch` | `--stage fetch` | Downloads NewsMTSC JSONL splits from GitHub; loads Amazon Reviews Multi EN from HuggingFace |
 | `clean` | `--stage clean` | Deduplicates, normalises labels, downsamples to balanced class distribution |
-| `classify` | `--stage classify` | Calls Ollama (Docker) with zero-shot and domain-specific prompts; writes prediction CSVs |
-| `evaluate` | `--stage evaluate` | Computes accuracy/F1/κ per run; runs LLM-based linguistic feature detection; produces error CSVs and feature summaries |
-| `compare` | `--stage compare` | Cross-domain table, prompt delta table, McNemar significance tests, aggregated feature ranking |
+| `classify` | `--stage classify` | Runs Llama 3.2:3B, Gemma3:4B, and Phi3:mini in zero-shot and domain-specific modes; writes one prediction CSV per (model, mode, domain) |
+| `evaluate` | `--stage evaluate` | Computes accuracy/F1/κ per run; runs LLM-based linguistic feature detection (Llama + Qwen); produces error CSVs, feature summaries, and inter-model agreement JSONs |
+| `compare` | `--stage compare` | Cross-domain table, cross-model pivot tables, prompt delta table, McNemar tests, aggregated feature ranking, inter-model feature agreement |
+
+### Models
+
+| Role | Models |
+|---|---|
+| Classification (RQ1, RQ3) | Llama 3.2:3B, Gemma3:4B, Phi3:mini |
+| Feature detection (RQ2) | Llama 3.2:3B, Qwen2.5:3B (independent annotators) |
 
 ### Prompting modes
 
@@ -95,7 +130,7 @@ fetch  →  clean  →  classify  →  evaluate  →  compare
 
 ### Linguistic feature detection
 
-Features are detected by querying Llama 3.2:3B with a structured JSON prompt asking it to classify each text for five binary features. Results are cached to `data/processed/llm_features_cache.jsonl` so detection only runs once per unique text. VADER compound score is retained as a supplementary numeric column.
+Features are detected by querying **both Llama 3.2:3B and Qwen2.5:3B** independently with a structured JSON prompt asking each to classify each text for five binary features. Results are cached to `data/processed/llm_features_cache.jsonl` (keyed by text MD5, per model) so detection only runs once per unique text. Per-run inter-model agreement (raw rate + Cohen's κ) is written to `{domain}_{model_slug}_model_agreement.json` and aggregated in `model_agreement_combined.csv`. VADER compound score is retained as a supplementary numeric column.
 
 ---
 
@@ -109,18 +144,18 @@ Features are detected by querying Llama 3.2:3B with a structured JSON prompt ask
 │   ├── pipeline.py                # Top-level orchestration
 │   ├── fetch/
 │   │   ├── fetch_nyt.py           # Downloads NewsMTSC from GitHub raw URLs
-│   │   └── fetch_amazon.py        # Loads Amazon Polarity from HuggingFace
+│   │   └── fetch_amazon.py        # Loads Amazon Reviews Multi EN from HuggingFace
 │   ├── clean/
 │   │   ├── clean_nyt.py           # Label normalisation + class balancing
-│   │   └── clean_amazon.py        # HTML stripping + class balancing
+│   │   └── clean_amazon.py        # Label mapping (star ratings → 3 classes) + class balancing
 │   ├── classify/
-│   │   ├── classifier.py          # Ollama client + response parser
+│   │   ├── classifier.py          # Ollama client + response parser (model-agnostic)
 │   │   └── prompts.py             # Zero-shot and domain-specific prompt templates
 │   └── evaluate/
 │       ├── metrics.py             # Accuracy, F1, Cohen's κ
-│       ├── error_analysis.py      # Per-sample feature flags + summary JSON
-│       ├── llm_features.py        # LLM-based linguistic feature detection with caching
-│       └── compare.py             # Cross-domain/cross-prompt synthesis + McNemar tests
+│       ├── error_analysis.py      # Per-sample feature flags + inter-model agreement JSON
+│       ├── llm_features.py        # Dual-model feature detection with caching (Llama + Qwen)
+│       └── compare.py             # Cross-domain/cross-model synthesis + McNemar tests
 ├── data/
 │   ├── raw/                       # Downloaded JSONL files
 │   └── processed/                 # Balanced CSVs + feature cache
@@ -137,8 +172,8 @@ Features are detected by querying Llama 3.2:3B with a structured JSON prompt ask
 ### Requirements
 
 - Python 3.10+
-- Docker with the `ollama/ollama` image and `llama3.2:3b` model pulled
-- A HuggingFace token (for Amazon Polarity download) in `.env` as `HF_TOKEN=...`
+- Docker with the `ollama/ollama` image and `llama3.2:3b`, `gemma3:4b`, `phi3:mini`, and `qwen2.5:3b` models pulled
+- A HuggingFace token in `.env` as `HF_TOKEN=...`
 
 ### Install
 
@@ -148,11 +183,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Start the model
+### Start the models
 
 ```bash
 docker start ollama   # assumes container already created with: docker run -d -p 11434:11434 --name ollama ollama/ollama
 docker exec ollama ollama pull llama3.2:3b
+docker exec ollama ollama pull gemma3:4b
+docker exec ollama ollama pull phi3:mini
+docker exec ollama ollama pull qwen2.5:3b
 ```
 
 ### Run the full pipeline
@@ -172,11 +210,15 @@ python -m src.pipeline --stage compare
 
 | File | Description |
 |---|---|
-| `results/metrics/{mode}/{domain}_metrics.json` | Accuracy, F1, κ, classification report |
-| `results/metrics/cross_domain_table.csv` | All 4 runs side by side |
-| `results/metrics/prompt_delta_table.csv` | Domain-specific minus zero-shot deltas |
-| `results/metrics/mcnemar_tests.json` | Statistical significance of prompting effect |
-| `results/error_analysis/{mode}/{domain}_errors.csv` | Per-sample predictions + feature flags |
-| `results/error_analysis/{mode}/{domain}_feature_summary.json` | Feature disagreement rates ranked by uplift |
-| `results/error_analysis/feature_ranking_combined.csv` | Aggregated ranking across all runs |
-| `data/processed/llm_features_cache.jsonl` | Cached LLM feature labels (keyed by MD5) |
+| `results/predictions/{mode}/{domain}_{model_slug}.csv` | Raw LLM predictions per (model, mode, domain) |
+| `results/metrics/{mode}/{domain}_{model_slug}_metrics.json` | Accuracy, F1, κ, classification report |
+| `results/metrics/cross_domain_table.csv` | All 12 runs (3 models × 2 modes × 2 domains) side by side |
+| `results/metrics/cross_model_{mode}.csv` | Models compared head-to-head per mode |
+| `results/metrics/prompt_delta_table.csv` | Domain-specific minus zero-shot deltas per model × domain |
+| `results/metrics/mcnemar_tests.json` | Statistical significance of prompting effect per model × domain |
+| `results/error_analysis/{mode}/{domain}_{model_slug}_errors.csv` | Per-sample predictions + feature flags (Llama and Qwen columns) |
+| `results/error_analysis/{mode}/{domain}_{model_slug}_feature_summary.json` | Feature disagreement rates ranked by uplift |
+| `results/error_analysis/{mode}/{domain}_{model_slug}_model_agreement.json` | Per-feature Llama vs Qwen agreement rate and Cohen's κ |
+| `results/error_analysis/feature_ranking_combined.csv` | Aggregated feature uplift ranking across all runs and models |
+| `results/error_analysis/model_agreement_combined.csv` | Inter-model feature agreement aggregated across all runs |
+| `data/processed/llm_features_cache.jsonl` | Cached LLM feature labels (keyed by MD5, per model) |

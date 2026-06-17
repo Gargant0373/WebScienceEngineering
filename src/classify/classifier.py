@@ -28,9 +28,11 @@ def classify(
     domain: str,
     mode: str,
     cfg: dict,
+    model: str = None,
 ) -> pathlib.Path:
     df = pd.read_csv(input_csv)
-    model = cfg["ollama"]["model"]
+    if model is None:
+        model = cfg["ollama"]["model"]
     base_url = cfg["ollama"]["base_url"]
 
     client = ollama.Client(host=base_url)

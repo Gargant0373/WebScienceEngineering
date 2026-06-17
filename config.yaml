@@ -1,6 +1,10 @@
 ollama:
   model: llama3.2:3b
   base_url: http://localhost:11434
+  classify_models:
+    - "llama3.2:3b"
+    - "gemma3:4b"
+    - "phi3:mini"
   models:
     - "llama3.2:3b"
     - "qwen2.5:3b"

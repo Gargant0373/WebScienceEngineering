@@ -42,34 +42,44 @@ def stage_clean(cfg: dict) -> None:
     clean_amazon(cfg)
 
 
+def _model_slug(model: str) -> str:
+    return model.replace(":", "-").replace(".", "")
+
+
 def stage_classify(cfg: dict) -> None:
     processed = pathlib.Path(cfg["output"]["processed_dir"])
     results = pathlib.Path(cfg["output"]["results_dir"])
+    classify_models = cfg["ollama"].get("classify_models", [cfg["ollama"]["model"]])
 
-    for domain in ("nyt", "amazon"):
-        input_csv = processed / domain / "labeled.csv"
-        for mode in ("zero_shot", "domain_specific"):
-            output_csv = results / "predictions" / mode / f"{domain}.csv"
-            classify(input_csv, output_csv, domain=domain, mode=mode, cfg=cfg)
+    for model in classify_models:
+        slug = _model_slug(model)
+        for domain in ("nyt", "amazon"):
+            input_csv = processed / domain / "labeled.csv"
+            for mode in ("zero_shot", "domain_specific"):
+                output_csv = results / "predictions" / mode / f"{domain}_{slug}.csv"
+                classify(input_csv, output_csv, domain=domain, mode=mode, cfg=cfg, model=model)
 
 
 def stage_evaluate(cfg: dict) -> None:
     results = pathlib.Path(cfg["output"]["results_dir"])
     metrics_dir = results / "metrics"
     errors_dir = results / "error_analysis"
+    classify_models = cfg["ollama"].get("classify_models", [cfg["ollama"]["model"]])
 
-    for mode in ("zero_shot", "domain_specific"):
-        for domain in ("nyt", "amazon"):
-            pred_csv = results / "predictions" / mode / f"{domain}.csv"
-            if not pred_csv.exists():
-                print(f"[pipeline] skipping missing {pred_csv}")
-                continue
-            compute_metrics(pred_csv, metrics_dir / mode)
-            analyze_errors(pred_csv, errors_dir / mode, cfg=cfg)
+    for model in classify_models:
+        slug = _model_slug(model)
+        for mode in ("zero_shot", "domain_specific"):
+            for domain in ("nyt", "amazon"):
+                pred_csv = results / "predictions" / mode / f"{domain}_{slug}.csv"
+                if not pred_csv.exists():
+                    print(f"[pipeline] skipping missing {pred_csv}")
+                    continue
+                compute_metrics(pred_csv, metrics_dir / mode)
+                analyze_errors(pred_csv, errors_dir / mode, cfg=cfg)
 
 
 def stage_compare(cfg: dict) -> None:
-    compare(pathlib.Path(cfg["output"]["results_dir"]))
+    compare(pathlib.Path(cfg["output"]["results_dir"]), cfg=cfg)
 
 
 def main() -> None:
