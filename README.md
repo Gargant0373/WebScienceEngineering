@@ -58,7 +58,18 @@ Phi3:mini achieves the strongest alignment overall (zero-shot NYT: κ=0.542), wh
 | Phi3:mini | NYT | −5.4pp | −0.080 | −0.048 |
 | Phi3:mini | Amazon | −1.8pp | −0.027 | −0.027 |
 
-Models respond very differently to domain-specific prompting. Llama suffers large degradation in both domains (McNemar p≈0), suggesting it over-interprets domain cues and forces neutral or hedged text into sentiment categories. Gemma3 is effectively immune to the prompting change (Δκ < 0.02 in both domains). Phi3 falls between the two with modest but significant degradation on NYT.
+McNemar's test (zero-shot vs domain-specific, per model × domain):
+
+| Model | Domain | χ² | p-value | Significant? |
+|---|---|---|---|---|
+| Llama 3.2:3B | NYT | 21.34 | <0.001 | Yes |
+| Llama 3.2:3B | Amazon | 40.06 | <0.001 | Yes |
+| Gemma3:4B | NYT | 0.02 | 0.892 | No |
+| Gemma3:4B | Amazon | 0.03 | 0.868 | No |
+| Phi3:mini | NYT | 5.98 | 0.014 | Yes |
+| Phi3:mini | Amazon | 0.98 | 0.321 | No |
+
+Models respond very differently to domain-specific prompting. Llama suffers large, statistically significant degradation in both domains, suggesting it over-interprets domain cues and forces neutral or hedged text into sentiment categories. Gemma3's prompting effect is entirely non-significant in both domains (p>0.85) — the model is effectively immune. Phi3 sits between the two: the degradation on NYT is significant (p=0.014) but the effect on Amazon does not reach significance (p=0.321).
 
 ### RQ2 — Linguistic feature ranking (LLM-detected)
 
