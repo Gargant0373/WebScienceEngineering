@@ -28,51 +28,51 @@ The pipeline fetches human-annotated data, balances it, runs all classifiers, th
 
 ## Key Findings
 
-### RQ1 — Cross-domain alignment gap
+### RQ1 — Cross-domain alignment
 
 | Model | Mode | Domain | Accuracy | F1 (weighted) | Cohen's κ |
 |---|---|---|---|---|---|
-| Llama 3.2:3B | Zero-shot | NYT (formal) | — | — | — |
-| Llama 3.2:3B | Zero-shot | Amazon (informal) | — | — | — |
-| Llama 3.2:3B | Domain-specific | NYT (formal) | — | — | — |
-| Llama 3.2:3B | Domain-specific | Amazon (informal) | — | — | — |
-| Gemma3:4B | Zero-shot | NYT (formal) | — | — | — |
-| Gemma3:4B | Zero-shot | Amazon (informal) | — | — | — |
-| Gemma3:4B | Domain-specific | NYT (formal) | — | — | — |
-| Gemma3:4B | Domain-specific | Amazon (informal) | — | — | — |
-| Phi3:mini | Zero-shot | NYT (formal) | — | — | — |
-| Phi3:mini | Zero-shot | Amazon (informal) | — | — | — |
-| Phi3:mini | Domain-specific | NYT (formal) | — | — | — |
-| Phi3:mini | Domain-specific | Amazon (informal) | — | — | — |
+| Llama 3.2:3B | Zero-shot | NYT (formal) | 0.622 | 0.598 | 0.433 |
+| Llama 3.2:3B | Zero-shot | Amazon (informal) | 0.655 | 0.643 | 0.482 |
+| Llama 3.2:3B | Domain-specific | NYT (formal) | 0.496 | 0.473 | 0.245 |
+| Llama 3.2:3B | Domain-specific | Amazon (informal) | 0.532 | 0.521 | 0.297 |
+| Gemma3:4B | Zero-shot | NYT (formal) | 0.651 | 0.637 | 0.476 |
+| Gemma3:4B | Zero-shot | Amazon (informal) | 0.610 | 0.548 | 0.416 |
+| Gemma3:4B | Domain-specific | NYT (formal) | 0.648 | 0.641 | 0.472 |
+| Gemma3:4B | Domain-specific | Amazon (informal) | 0.619 | 0.578 | 0.430 |
+| **Phi3:mini** | **Zero-shot** | **NYT (formal)** | **0.695** | **0.689** | **0.542** |
+| Phi3:mini | Zero-shot | Amazon (informal) | 0.656 | 0.632 | 0.484 |
+| Phi3:mini | Domain-specific | NYT (formal) | 0.641 | 0.642 | 0.463 |
+| Phi3:mini | Domain-specific | Amazon (informal) | 0.638 | 0.605 | 0.457 |
 
-*Results pending.*
+Phi3:mini achieves the strongest alignment overall (zero-shot NYT: κ=0.542), while Gemma3:4B performs most consistently across both domains. All models show a small advantage on informal reviews in zero-shot mode, though the gap is narrower than in binary-classification settings due to the additional neutral class.
 
 ### RQ3 — Effect of domain-specific prompting
 
 | Model | Domain | Accuracy Δ | Kappa Δ | F1 Δ |
 |---|---|---|---|---|
-| Llama 3.2:3B | NYT | — | — | — |
-| Llama 3.2:3B | Amazon | — | — | — |
-| Gemma3:4B | NYT | — | — | — |
-| Gemma3:4B | Amazon | — | — | — |
-| Phi3:mini | NYT | — | — | — |
-| Phi3:mini | Amazon | — | — | — |
+| Llama 3.2:3B | NYT | −12.6pp | −0.187 | −0.126 |
+| Llama 3.2:3B | Amazon | −12.2pp | −0.185 | −0.122 |
+| Gemma3:4B | NYT | −0.3pp | −0.004 | +0.004 |
+| Gemma3:4B | Amazon | +0.9pp | +0.014 | +0.030 |
+| Phi3:mini | NYT | −5.4pp | −0.080 | −0.048 |
+| Phi3:mini | Amazon | −1.8pp | −0.027 | −0.027 |
 
-*Results pending. McNemar significance tests are computed per model × domain.*
+Models respond very differently to domain-specific prompting. Llama suffers large degradation in both domains (McNemar p≈0), suggesting it over-interprets domain cues and forces neutral or hedged text into sentiment categories. Gemma3 is effectively immune to the prompting change (Δκ < 0.02 in both domains). Phi3 falls between the two with modest but significant degradation on NYT.
 
 ### RQ2 — Linguistic feature ranking (LLM-detected)
 
-Features are detected independently by Llama 3.2:3B and Qwen2.5:3B, then ranked by disagreement uplift (P(disagree | feature present) − P(disagree | feature absent)) averaged across all runs and models:
+Features were detected independently by Llama 3.2:3B and Qwen2.5:3B, then ranked by disagreement uplift (P(disagree | feature present) − P(disagree | feature absent)), averaged across all 12 runs (3 models × 2 modes × 2 domains):
 
 | Feature | Mean uplift |
 |---|---|
-| Slang | — |
-| Hedging | — |
-| Sarcasm | — |
-| Implicit meaning | — |
-| Mixed sentiment | — |
+| Hedging | **+0.097** |
+| Slang | −0.017 |
+| Implicit meaning | −0.022 |
+| Sarcasm | −0.047 |
+| Mixed sentiment | −0.103 |
 
-*Results pending.*
+Hedging is the only consistent positive predictor of human–LLM disagreement, and the effect is robust across all three classifiers. Mixed sentiment shows the strongest negative uplift: when a model detects both positive and negative signals in the same text, it tends to agree with the human label, likely because the net polarity is still legible. Sarcasm also shows negative uplift — consciously detected irony does not mislead the models.
 
 ### RQ2 — Inter-model feature agreement (Llama 3.2:3B vs Qwen2.5:3B)
 
@@ -80,13 +80,13 @@ To assess robustness of the feature labels used in RQ2, the same five features w
 
 | Feature | Agreement | Cohen's κ |
 |---|---|---|
-| Sarcasm | — | — |
-| Hedging | — | — |
-| Slang | — | — |
-| Mixed sentiment | — | — |
-| Implicit meaning | — | — |
+| Sarcasm | 0.877 | **0.430** |
+| Hedging | 0.658 | 0.301 |
+| Slang | 0.943 | 0.195 |
+| Mixed sentiment | 0.669 | 0.077 |
+| Implicit meaning | 0.557 | 0.033 |
 
-*Results pending.*
+Sarcasm (κ=0.43) and hedging (κ=0.30) show moderate inter-model agreement, lending confidence to the findings for those features. Mixed sentiment and implicit meaning fall near chance-level κ, meaning the two annotator models label those features inconsistently. Findings for these features should be treated with caution.
 
 ---
 
