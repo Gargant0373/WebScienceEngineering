@@ -81,6 +81,22 @@ def _mcnemar(df_a: pd.DataFrame, df_b: pd.DataFrame) -> dict:
     }
 
 
+def _holm_bonferroni(pvalues: list[float]) -> list[float]:
+    """Holm step-down adjusted p-values, returned in the input order.
+
+    Controls the family-wise error rate across the family of McNemar tests.
+    Compare each adjusted value against the desired alpha (e.g. 0.05).
+    """
+    m = len(pvalues)
+    order = sorted(range(m), key=lambda i: pvalues[i])
+    adjusted = [0.0] * m
+    running_max = 0.0
+    for rank, idx in enumerate(order):
+        running_max = max(running_max, (m - rank) * pvalues[idx])
+        adjusted[idx] = min(running_max, 1.0)
+    return adjusted
+
+
 def compare(results_dir: pathlib.Path, cfg: dict = None) -> None:
     results_dir = pathlib.Path(results_dir)
     modes = ["zero_shot", "domain_specific"]
@@ -171,17 +187,29 @@ def compare(results_dir: pathlib.Path, cfg: dict = None) -> None:
     # --- McNemar tests (prompting effect per model × domain) ---
     tests = {}
     for slug in slugs:
-        model = model_by_slug[slug]
         for domain in domains:
             stem = f"{domain}_{slug}"
             df_zs = _load_predictions(results_dir, "zero_shot", stem)
             df_ds = _load_predictions(results_dir, "domain_specific", stem)
-            result = _mcnemar(df_zs, df_ds)
-            key = f"prompt_effect_{domain}_{slug}"
-            tests[key] = result
-            sig = result.get("significant_at_0.05", "N/A")
+            tests[f"prompt_effect_{domain}_{slug}"] = _mcnemar(df_zs, df_ds)
+
+    # Holm-Bonferroni correction across the family of McNemar tests, so the
+    # reported significance accounts for running six paired comparisons.
+    valid_keys = [k for k, r in tests.items() if "p_value" in r]
+    adjusted = _holm_bonferroni([tests[k]["p_value"] for k in valid_keys])
+    for key, p_adj in zip(valid_keys, adjusted):
+        tests[key]["p_value_holm"] = round(float(p_adj), 4)
+        tests[key]["significant_holm_0.05"] = bool(p_adj < 0.05)
+
+    for slug in slugs:
+        model = model_by_slug[slug]
+        for domain in domains:
+            result = tests[f"prompt_effect_{domain}_{slug}"]
             p = result.get("p_value", "N/A")
-            print(f"\n[compare] McNemar prompt effect ({domain}, {model}): p={p}  significant={sig}")
+            p_adj = result.get("p_value_holm", "N/A")
+            sig = result.get("significant_holm_0.05", "N/A")
+            print(f"\n[compare] McNemar prompt effect ({domain}, {model}): "
+                  f"p={p}  p_holm={p_adj}  significant={sig}")
 
     tests_path = metrics_dir / "mcnemar_tests.json"
     with tests_path.open("w") as f:

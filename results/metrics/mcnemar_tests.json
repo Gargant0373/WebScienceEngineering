@@ -5,7 +5,9 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 125,
     "n_a_wrong_b_correct": 61,
-    "significant_at_0.05": true
+    "significant_at_0.05": true,
+    "p_value_holm": 0.0,
+    "significant_holm_0.05": true
   },
   "prompt_effect_amazon_llama32-3b": {
     "statistic": 40.0608,
@@ -13,7 +15,9 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 113,
     "n_a_wrong_b_correct": 35,
-    "significant_at_0.05": true
+    "significant_at_0.05": true,
+    "p_value_holm": 0.0,
+    "significant_holm_0.05": true
   },
   "prompt_effect_nyt_gemma3-4b": {
     "statistic": 0.0185,
@@ -21,7 +25,9 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 28,
     "n_a_wrong_b_correct": 26,
-    "significant_at_0.05": false
+    "significant_at_0.05": false,
+    "p_value_holm": 1.0,
+    "significant_holm_0.05": false
   },
   "prompt_effect_amazon_gemma3-4b": {
     "statistic": 0.0278,
@@ -29,7 +35,9 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 18,
     "n_a_wrong_b_correct": 18,
-    "significant_at_0.05": false
+    "significant_at_0.05": false,
+    "p_value_holm": 1.0,
+    "significant_holm_0.05": false
   },
   "prompt_effect_nyt_phi3-mini": {
     "statistic": 5.9847,
@@ -37,7 +45,9 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 80,
     "n_a_wrong_b_correct": 51,
-    "significant_at_0.05": true
+    "significant_at_0.05": true,
+    "p_value_holm": 0.0576,
+    "significant_holm_0.05": false
   },
   "prompt_effect_amazon_phi3-mini": {
     "statistic": 0.9846,
@@ -45,6 +55,8 @@
     "n_pairs": 498,
     "n_a_correct_b_wrong": 37,
     "n_a_wrong_b_correct": 28,
-    "significant_at_0.05": false
+    "significant_at_0.05": false,
+    "p_value_holm": 0.9633,
+    "significant_holm_0.05": false
   }
 }
